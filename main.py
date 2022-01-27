@@ -112,6 +112,7 @@ async def main():
     except:
         print("error navigating to wordle page")
         return
+
     await browser._connection.send('Browser.grantPermissions', { 'origin': 'https://www.powerlanguage.co.uk/wordle/', 'permissions': ['clipboardRead', 'clipboardWrite'] })
 
     for row in range(6):
@@ -151,17 +152,18 @@ async def main():
         print("correct letters:", correctLetters)
         print("letters in correct positions:", correctLetterPos)
         print("letters in incorrect positions:", incorrectLetterPos)     
-        
+
         words, letterSummary = getPossibleWords(words, incorrectLetters, correctLetters, correctLetterPos, incorrectLetterPos)
         wordScores = getWordScores(words, letterSummary)
         candidateWords = sorted(wordScores.items(), key=lambda item: item[1], reverse = True)
-        print("candidate words:", dict(sorted(wordScores.items(), key=lambda item: item[1], reverse = True)))
-        
+        print("candidate words:", dict(candidateWords))
+
         word = candidateWords[0][0]
         print("next word:", word, "\n")
 
     await page.waitForFunction("document.querySelector('game-app').shadowRoot.querySelector('game-stats')")
     await page.evaluate("document.querySelector('game-app').shadowRoot.querySelector('game-stats').shadowRoot.getElementById('share-button').click()")
+
     text = await page.evaluate("navigator.clipboard.readText()")
     requests.post(os.environ["WORDLE_BOT_SLACK_WEBHOOK_HOTEL_HARVEY"], data=json.dumps({ 'text': text }))
     print(text)
