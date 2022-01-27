@@ -55,16 +55,13 @@ def getPossibleWords(words, incorrectLetters, correctLetters, correctLetterPos, 
 
 def getWordScores(words, letterSummary):
     wordScores = {}
-    maximum = (0, None)
     for word in words:
         score = 0
         for letter in set(word): # only count unique letters towards score
             score += letterSummary[letter]
         score *= zipf_frequency(word, 'en')
-        if score > maximum[0]:
-            maximum = (score, word)
-        wordScores[word] = score
-    return maximum[1], wordScores
+        wordScores[word] = round(score, 2)
+    return wordScores
 
 
 # absent, present, correct
@@ -99,24 +96,27 @@ async def main():
 
     words = getWords()
     words, letterSummary = getPossibleWords(words, incorrectLetters, correctLetters, correctLetterPos, incorrectLetterPos)
-    word, wordScores = getWordScores(words, letterSummary)
-    print(dict(sorted(wordScores.items(), key=lambda item: item[1], reverse = True)[:40]))
+    wordScores = getWordScores(words, letterSummary)
+    candidateWords = sorted(wordScores.items(), key=lambda item: item[1], reverse = True)[:40]
+    print("candidate words:", dict(candidateWords))
 
     index = randint(0, 39)
-    word = sorted(wordScores.items(), key=lambda item: item[1], reverse = True)[index][0]
-    print(word)
+    word = candidateWords[index][0]
+    print("first word selected randomly from 40 candidate words:", word, "\n")
 
     try:
-        browser = await launch(headless=False)
-        page = await browser.newPage()
+        browser = await launch({"headless":False, "args" : ['--window-size=720,1080', "--window-position=0,0"]})
+        [page] = await browser.pages()
         await page.goto('https://www.powerlanguage.co.uk/wordle/')
         await page.evaluate("document.querySelector('game-app').shadowRoot.querySelector('game-modal').shadowRoot.querySelector('game-icon').click()")
     except:
         print("error navigating to wordle page")
         return
     await browser._connection.send('Browser.grantPermissions', { 'origin': 'https://www.powerlanguage.co.uk/wordle/', 'permissions': ['clipboardRead', 'clipboardWrite'] })
+
     for row in range(6):
-        time.sleep(1)
+        time.sleep(1) # buffer to give Wordle time to render
+
         try:
             await page.keyboard.type(word, delay=100)
             await page.keyboard.press('Enter', delay=100)
@@ -124,14 +124,13 @@ async def main():
             print("error typing word")
             return
 
-        # wait until all letters have a state in keyboard before moving on
+        # wait until the last letter has a state before continuing
         try:
             await page.waitForFunction(f"() => document.querySelector('game-app').shadowRoot.querySelectorAll('game-row')[{row}].shadowRoot.querySelectorAll('game-tile')[4].shadowRoot.querySelector('.tile[data-state=\"absent\"], .tile[data-state=\"present\"], .tile[data-state=\"correct\"]')")
         except:
             print("error waiting for letters to be evaluated")
             return
 
-        # await page.waitForFunction(f"() => document.querySelector('game-app').shadowRoot.querySelector('game-keyboard').shadowRoot.querySelector('[data-key=\"{word[0]}\"][data-state]') && document.querySelector('game-app').shadowRoot.querySelector('game-keyboard').shadowRoot.querySelector('[data-key=\"{word[1]}\"][data-state]') && document.querySelector('game-app').shadowRoot.querySelector('game-keyboard').shadowRoot.querySelector('[data-key=\"{word[2]}\"][data-state]') && document.querySelector('game-app').shadowRoot.querySelector('game-keyboard').shadowRoot.querySelector('[data-key=\"{word[3]}\"][data-state]') && document.querySelector('game-app').shadowRoot.querySelector('game-keyboard').shadowRoot.querySelector('[data-key=\"{word[4]}\"][data-state]')")
         states = { "correct": [], "present": [], "absent": [] }
         for col in range(5):
             try:
@@ -145,18 +144,26 @@ async def main():
             print("woohoo!")
             break
 
-        print(states)
+        print("results from wordle:", states)
+
         incorrectLetters, correctLetters, correctLetterPos, incorrectLetterPos = processGuessResult(states, word, incorrectLetters, correctLetters, correctLetterPos, incorrectLetterPos)
-        print(incorrectLetters, correctLetters, correctLetterPos, incorrectLetterPos)
+        print("incorrect letters:", incorrectLetters)
+        print("correct letters:", correctLetters)
+        print("letters in correct positions:", correctLetterPos)
+        print("letters in incorrect positions:", incorrectLetterPos)     
+        
         words, letterSummary = getPossibleWords(words, incorrectLetters, correctLetters, correctLetterPos, incorrectLetterPos)
-        word, wordScores = getWordScores(words, letterSummary)
-        print(dict(sorted(wordScores.items(), key=lambda item: item[1], reverse = True)))
-        # word = input("enter word: ")
+        wordScores = getWordScores(words, letterSummary)
+        candidateWords = sorted(wordScores.items(), key=lambda item: item[1], reverse = True)
+        print("candidate words:", dict(sorted(wordScores.items(), key=lambda item: item[1], reverse = True)))
+        
+        word = candidateWords[0][0]
+        print("next word:", word, "\n")
 
     await page.waitForFunction("document.querySelector('game-app').shadowRoot.querySelector('game-stats')")
     await page.evaluate("document.querySelector('game-app').shadowRoot.querySelector('game-stats').shadowRoot.getElementById('share-button').click()")
     text = await page.evaluate("navigator.clipboard.readText()")
-    requests.post(os.environ["WORDLE_BOT_SLACK_WEBHOOK"], data=json.dumps({ 'text': text }))
+    requests.post(os.environ["WORDLE_BOT_SLACK_WEBHOOK_HOTEL_HARVEY"], data=json.dumps({ 'text': text }))
     print(text)
 
     try:
