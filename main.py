@@ -13,9 +13,12 @@ from wordfreq import zipf_frequency
 
 def getWords():
     words = []
-    f = open("words.txt", "r") # https://www-cs-faculty.stanford.edu/~knuth/sgb.html
+    f = open("stanford-words.txt", "r") # https://www-cs-faculty.stanford.edu/~knuth/sgb.html
     for line in f:
         word = line.strip()
+        frequency = zipf_frequency(word, 'en')
+        if frequency == 0: # remove words with a frequency score of 0 from the potential word list
+            continue
         words.append(word)
     return set(words)
 
