@@ -85,6 +85,7 @@ def processGuessResult(states, word, incorrectLetters, correctLetters, correctLe
         incorrectLetters.add(letter)
     return incorrectLetters, correctLetters, correctLetterPos, incorrectLetterPos
 
+
 async def main():
     incorrectLetters = set([])
     correctLetters = set([])
@@ -110,13 +111,13 @@ async def main():
     try:
         browser = await launch({"headless":False, "args" : ['--window-size=720,1080', "--window-position=0,0"]})
         [page] = await browser.pages()
-        await page.goto('https://www.powerlanguage.co.uk/wordle/')
+        await page.goto('https://www.nytimes.com/games/wordle/index.html')
         await page.evaluate("document.querySelector('game-app').shadowRoot.querySelector('game-modal').shadowRoot.querySelector('game-icon').click()")
     except:
         print("error navigating to wordle page")
         return
 
-    await browser._connection.send('Browser.grantPermissions', { 'origin': 'https://www.powerlanguage.co.uk/wordle/', 'permissions': ['clipboardRead', 'clipboardWrite'] })
+    await browser._connection.send('Browser.grantPermissions', { 'origin': 'https://www.nytimes.com/games/wordle/index.html', 'permissions': ['clipboardRead', 'clipboardWrite'] })
 
     for row in range(6):
         time.sleep(1) # buffer to give Wordle time to render
@@ -168,7 +169,9 @@ async def main():
     await page.evaluate("document.querySelector('game-app').shadowRoot.querySelector('game-stats').shadowRoot.getElementById('share-button').click()")
 
     text = await page.evaluate("navigator.clipboard.readText()")
-    requests.post(os.environ["WORDLE_BOT_SLACK_WEBHOOK_HOTEL_HARVEY"], data=json.dumps({ 'text': text }))
+    # requests.post(os.environ["WORDLE_BOT_SLACK_WEBHOOK_CAKE_WORDLE"], data=json.dumps({ 'text': text }))
+    # requests.post(os.environ["WORDLE_BOT_SLACK_WEBHOOK_HOTEL_HARVEY"], data=json.dumps({ 'text': text }))
+    requests.post(os.environ["WORDLE_BOT_SLACK_WEBHOOK_HOTEL_HARVEY_PRIVATE"], data=json.dumps({ 'text': text }))
     print(text)
 
     try:
