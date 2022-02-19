@@ -26,7 +26,7 @@ def guessWord(secretWord):
 
 results = {}
 
-f = open("wordle-words.txt", "r")
+f = open("solution-words.txt", "r")
 count = 0
 for line in f:
     count += 1
@@ -41,4 +41,11 @@ for line in f:
     if count % 100 == 0:
         print(count)
 
-print(results)
+print('guesses | count')
+weighted_sum = 0
+for key in sorted(results):
+    print(key, '|', results[key])
+    weighted_sum += key * results[key]
+
+print(weighted_sum / count)
+

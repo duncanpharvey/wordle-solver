@@ -1708,7 +1708,8 @@ shard
 share
 shark
 sharp
-shavshawl
+shave
+shawl
 shear
 sheen
 sheep
