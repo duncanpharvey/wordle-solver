@@ -1,16 +1,18 @@
 from wordfreq import zipf_frequency
 import collections
+import math
 
+word_frequency = {}
+
+def sigmoid(x):
+    return 2 * ((1 / (1 + math.exp(-x))) - 0.5)
 
 def getWords():
     words = []
-    # https://www-cs-faculty.stanford.edu/~knuth/sgb.html
     f = open("all-words.txt", "r")
     for line in f:
         word = line.strip()
-        frequency = zipf_frequency(word, 'en')
-        if frequency == 0:  # remove words with a frequency score of 0 from the potential word list
-            continue
+        word_frequency[word] = sigmoid(zipf_frequency(word, 'en'))
         words.append(word)
     return words
 
@@ -28,7 +30,7 @@ def getWordScores(words):
         score = 0
         for letter in set(word):  # only count unique letters towards score
             score += letterSummary[letter]
-        score *= zipf_frequency(word, 'en')
+        score *= word_frequency[word]
         wordScores[word] = round(score, 2)
     return wordScores
 

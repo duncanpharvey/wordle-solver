@@ -47,5 +47,5 @@ for key in sorted(results):
     print(key, '|', results[key])
     weighted_sum += key * results[key]
 
-print(weighted_sum / count)
+print(round(weighted_sum / count), 4)
 
