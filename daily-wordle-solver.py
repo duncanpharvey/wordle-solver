@@ -70,9 +70,7 @@ async def main():
     await page.evaluate("document.querySelector('game-app').shadowRoot.querySelector('game-stats').shadowRoot.getElementById('share-button').click()")
 
     text = await page.evaluate("navigator.clipboard.readText()")
-    # requests.post(os.environ["WORDLE_BOT_SLACK_WEBHOOK_CAKE_WORDLE"], data=json.dumps({ 'text': text }))
-    # requests.post(os.environ["WORDLE_BOT_SLACK_WEBHOOK_HOTEL_HARVEY"], data=json.dumps({ 'text': text }))
-    requests.post(os.environ["WORDLE_BOT_SLACK_WEBHOOK_HOTEL_HARVEY_PRIVATE"], data=json.dumps({ 'text': text }))
+    requests.post(os.environ["WORDLE_BOT_SLACK_WEBHOOK_HOTEL_HARVEY"], data=json.dumps({ 'text': text }))
     print(text)
 
     try:

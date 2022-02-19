@@ -4,7 +4,6 @@ import collections
 
 def getWords():
     words = []
-    # https://www-cs-faculty.stanford.edu/~knuth/sgb.html
     f = open("all-words.txt", "r")
     for line in f:
         word = line.strip()
