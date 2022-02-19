@@ -41,11 +41,15 @@ for line in f:
     if count % 100 == 0:
         print(count)
 
-print('guesses | count')
+max_guess_len = len(max(map(lambda x: str(x), results.keys()), key=len))
+max_solution_len = len(max(map(lambda x: str(x), results.values()), key=len))
+
+print('| Guess Count | Wordle Solution Count |')
+print('| {} | {} |'.format('-' * max_guess_len, '-' * max_solution_len))
+
 weighted_sum = 0
 for key in sorted(results):
-    print(key, '|', results[key])
+    print('|', key, '|', str(results[key]).ljust(max_solution_len, ' '), '|')
     weighted_sum += key * results[key]
 
-print(weighted_sum / count)
-
+print('\nWeighted Mean: `{}`'.format(round(weighted_sum / count, 4)))

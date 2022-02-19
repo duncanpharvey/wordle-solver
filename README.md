@@ -18,3 +18,19 @@
 | 9 | 4   |
 
 Weighted Mean: `4.0429`
+
+### Letter Count and Improved Word Frequency Algorithm
+
+| Guess Count | Wordle Solution Count |
+| - | --- |
+| 1 | 1   |
+| 2 | 96  |
+| 3 | 766 |
+| 4 | 898 |
+| 5 | 383 |
+| 6 | 114 |
+| 7 | 39  |
+| 8 | 9   |
+| 9 | 3   |
+
+Weighted Mean: `3.9212`

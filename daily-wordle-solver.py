@@ -29,7 +29,7 @@ async def main():
         if len(candidateWords) == 0:
             print("no candidate words left")
             return
-        print("candidate words:", dict(candidateWords[:25]))
+        print("candidate words:", dict(candidateWords[:40]))
 
         guessedWord = candidateWords[0][0]
         print("next word:", guessedWord)
